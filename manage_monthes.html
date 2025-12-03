@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة شهور جديدة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6C5CE7;
+            --secondary-color: #A29BFE;
+            --dark-color: #2D3436;
+            --light-color: #F5F6FA;
+            --accent-color: #00CE9F;
+            --danger-color: #E74C3C;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+        body {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            padding: 30px;
+        }
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background-color: var(--primary-color);
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .back-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .back-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        .add-month-panel {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .add-month-panel h3 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            font-size: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark-color);
+        }
+        .form-control, .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        #add-month-btn {
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 18px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        #add-month-btn:hover:not(:disabled) {
+            background-color: #00b38c;
+        }
+        #add-month-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            text-align: center;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="page-content" style="display: none;">
+
+    <div class="header-container">
+        <div class="header-title">إدارة المحتوى</div>
+        <a href="admin.html" class="back-btn">
+            <i class="fas fa-arrow-right"></i> رجوع للوحة التحكم
+        </a>
+    </div>
+
+    <div id="alert-message"></div>
+
+    <div class="add-month-panel">
+        <h3><i class="fas fa-plus-circle"></i> إضافة شهر/وحدة جديدة</h3>
+        
+        <div class="form-group">
+            <label for="new-month-year">اختر المدرس (السنة الدراسية)</label>
+            <select id="new-month-year" class="form-select">
+                <option value="" disabled selected>-- اختر من القائمة --</option>
+                </select>
+        </div>
+
+        <div class="form-group">
+            <label for="new-month-name">اسم الشهر/الوحدة</label>
+            <input type="text" id="new-month-name" class="form-control" placeholder="مثال: الشهر الاول">
+        </div>
+
+        <div class="form-group">
+            <label for="new-month-order">ترتيب الظهور (رقم)</label>
+            <input type="number" id="new-month-order" class="form-control" value="1" min="1">
+            <small style="color: #666;">يستخدم هذا الرقم لترتيب الشهور في التطبيق (1 يظهر أولاً).</small>
+        </div>
+
+        <button id="add-month-btn">إضافة الشهر لقاعدة البيانات</button>
+    </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+
+<script>
+// ==========================================================
+// ========== إعدادات Firebase ==========
+// ==========================================================
+const firebaseConfig = {
+    apiKey: 'AIzaSyCdqYrVFspJ4rZwidfaPtc9PYpNlQQm09k',
+    appId: '1:284879336757:web:1f42836c2382d11b73087c',
+    messagingSenderId: '284879336757',
+    projectId: 'amgg-81ac3',
+    authDomain: 'amgg-81ac3.firebaseapp.com',
+    databaseURL: 'https://amgg-81ac3-default-rtdb.firebaseio.com',
+    storageBucket: 'amgg-81ac3.firebasestorage.app',
+    measurementId: 'G-FMZW8S6WES',
+};
+
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
+// ==========================================================
+// ========== حارس الأمان ==========
+// ==========================================================
+const auth = firebase.auth();
+const database = firebase.database();
+
+auth.onAuthStateChanged(user => {
+    if (user) {
+        database.ref(`admins/${user.uid}`).once('value', snapshot => {
+            if (snapshot.exists()) {
+                document.getElementById('page-content').style.display = 'block';
+                initializeAppLogic(); 
+            } else {
+                alert('ليس لديك صلاحيات الوصول لهذه الصفحة.');
+                auth.signOut();
+                window.location.href = 'index.html';
+            }
+        });
+    } else {
+        window.location.href = 'index.html';
+    }
+});
+
+// ==========================================================
+// ========== منطق الصفحة ==========
+// ==========================================================
+function initializeAppLogic() {
+
+    const monthsRef = database.ref('months');
+    
+    // العناصر
+    const alertMessageDiv = document.getElementById('alert-message');
+    const newMonthYearSelect = document.getElementById('new-month-year');
+    const newMonthNameInput = document.getElementById('new-month-name');
+    const newMonthOrderInput = document.getElementById('new-month-order');
+    const addMonthBtn = document.getElementById('add-month-btn');
+
+    // 1. تعبئة قائمة المدرسين (من 1 إلى 25)
+    for (let i = 1; i <= 25; i++) {
+        const teacherName = `مدرس ${i}`;
+        const option = document.createElement('option');
+        option.value = teacherName;
+        option.textContent = teacherName;
+        newMonthYearSelect.appendChild(option);
+    }
+
+    // دالة عرض التنبيهات
+    function showAlert(message, type = 'success') {
+        alertMessageDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        setTimeout(() => {
+            alertMessageDiv.innerHTML = '';
+        }, 5000);
+    }
+
+    // 2. وظيفة إضافة الشهر
+    async function addMonth() {
+        const yearName = newMonthYearSelect.value;
+        const monthName = newMonthNameInput.value.trim();
+        const order = parseInt(newMonthOrderInput.value) || 999;
+
+        // تحقق من المدخلات
+        if (!yearName) {
+            showAlert('الرجاء اختيار المدرس (السنة الدراسية).', 'danger');
+            return;
+        }
+        if (!monthName) {
+            showAlert('الرجاء إدخال اسم الشهر.', 'danger');
+            return;
+        }
+
+        // تغيير حالة الزر أثناء التحميل
+        addMonthBtn.disabled = true;
+        addMonthBtn.innerHTML = 'جاري الإضافة <span class="loading-spinner"></span>';
+
+        try {
+            // إضافة البيانات إلى Firebase
+            // المسار: months / اسم_المدرس / ID_تلقائي
+            const newMonthRef = monthsRef.child(yearName).push();
+            
+            await newMonthRef.set({
+                name: monthName,
+                order: order,
+                createdAt: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            showAlert(`✅ تم إضافة "${monthName}" بنجاح في قسم ${yearName}.`, 'success');
+            
+            // إعادة تعيين الحقول
+            newMonthNameInput.value = '';
+            newMonthOrderInput.value = (order + 1).toString(); // زيادة الترتيب تلقائياً للتسهيل
+
+        } catch (error) {
+            console.error("Error adding month:", error);
+            showAlert(`🚫 فشل إضافة الشهر: ${error.message}`, 'danger');
+        } finally {
+            // إعادة الزر لحالته الطبيعية
+            addMonthBtn.disabled = false;
+            addMonthBtn.innerHTML = 'إضافة الشهر لقاعدة البيانات';
+        }
+    }
+
+    // ربط الزر بالدالة
+    addMonthBtn.addEventListener('click', addMonth);
+}
+</script>
+</body>
+</html>
