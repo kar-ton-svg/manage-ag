@@ -6,7 +6,7 @@
 <title>إنشاء أكواد تفعيل مجمعة</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-/* ... (أكواد الـ CSS كما أرسلتها أنت) ... */
+/* ... (أكواد الـ CSS كما هي) ... */
 :root {
 --primary-color: #06467A;
 --secondary-color: #A29BFE;
@@ -203,7 +203,7 @@ color: #721c24;
 
 <script>
 // ==========================================================
-// تم وضع إعدادات Firebase الخاصة بك هنا
+// تم وضع إعدادات Firebase الخاصة بك
 // ==========================================================
 const firebaseConfig = {
 apiKey: 'AIzaSyCdqYrVFspJ4rZwidfaPtc9PYpNlQQm09k',
@@ -233,7 +233,7 @@ database.ref(`admins/${user.uid}`).once('value', snapshot => {
 if (snapshot.exists()) {
 console.log('Admin access granted.');
 document.getElementById('page-content').style.display = 'block';
-initializeAppLogic(); // [تعديل] بدء تشغيل الكود
+initializeAppLogic();
 } else {
 alert('ليس لديك صلاحيات الوصول لهذه الصفحة.');
 auth.signOut();
@@ -250,7 +250,6 @@ window.location.href = 'index.html';
 // ==========================================================
 
 
-// [تعديل] تغليف كل الكود الأصلي
 function initializeAppLogic() {
 
 const codesRef = database.ref('codes');
@@ -316,20 +315,15 @@ monthsListDiv.innerHTML = '<p style="color: red;">خطأ في تحميل الش�
 }
 }
 
-// ==========================================================
-// ========== [تعديل] تم تغيير هذه الدالة ==========
-// ==========================================================
+// دالة توليد كود عشوائي من 11 رقم
 function generateRandomCode() {
-// [تعديل] إنشاء كود من 11 رقم
-const chars = '0123456789'; // أرقام فقط
+const chars = '0123456789';
 let code = '';
-for (let i = 0; i < 11; i++) { // [تعديل] تم تغيير الطول إلى 11
+for (let i = 0; i < 11; i++) {
 code += chars.charAt(Math.floor(Math.random() * chars.length));
 }
 return code;
 }
-// ==========================================================
-// ==========================================================
 
 
 async function generateAndSaveCodes() {
@@ -342,6 +336,7 @@ const selectedServer = teacherSelect.value;
 const selectedMonthCheckboxes = monthsListDiv.querySelectorAll('input[type="checkbox"]:checked');
 const selectedMonthIds = Array.from(selectedMonthCheckboxes).map(cb => cb.dataset.monthId);
 const codeCount = parseInt(codeCountInput.value) || 1;
+const MAX_LIMIT = 160;
 
 if (!selectedServer || selectedMonthIds.length === 0) {
 showAlert('الرجاء اختيار مدرس وشهر واحد على الأقل.');
@@ -351,6 +346,23 @@ return;
 }
 
 try {
+// =====================================================
+// التحقق من عدد الأكواد الحالية للمدرس
+// =====================================================
+const limitSnapshot = await codesRef.orderByChild('server').equalTo(selectedServer).once('value');
+const currentCount = limitSnapshot.numChildren();
+
+// [تعديل] إذا كان العدد يتجاوز الحد أو سيؤدي للتجاوز، اظهر رسالة خطأ عامة
+if (currentCount >= MAX_LIMIT || (currentCount + codeCount > MAX_LIMIT)) {
+showAlert('حدث خطأ أثناء إنشاء الأكواد', 'danger');
+generateBtn.disabled = false;
+generateBtn.innerHTML = '<span>إنشاء الأكواد</span>';
+return;
+}
+// =====================================================
+// نهاية التحقق
+// =====================================================
+
 const updates = {};
 const generatedCodes = [];
 
@@ -373,7 +385,6 @@ months: selectedMonthIds
 generatedCodes.push(newCode);
 }
 
-// Save all codes in one batch
 await codesRef.update(updates);
 
 codeDisplay.value = generatedCodes.join('\n');
@@ -382,7 +393,7 @@ selectedMonthCheckboxes.forEach(cb => cb.checked = false);
 
 } catch (error) {
 console.error("Error generating codes:", error);
-showAlert('حدث خطأ أثناء إنشاء الأكواد. تأكد من اتصالك بالإنترنت.');
+showAlert('حدث خطأ أثناء إنشاء الأكواد'); // رسالة عامة أيضاً في حالة الخطأ التقني
 } finally {
 generateBtn.disabled = false;
 generateBtn.innerHTML = '<span>إنشاء الأكواد</span>';
@@ -400,7 +411,7 @@ copyBtn.textContent = 'تم النسخ!';
 setTimeout(() => { copyBtn.textContent = 'نسخ جميع الأكواد'; }, 2000);
 });
 
-} // [تعديل] إغلاق دالة initializeAppLogic
+}
 </script>
 </body>
 </html>
